@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/router';
 import {
   LayoutDashboard,
   Users,
@@ -96,7 +97,14 @@ const statusColors: Record<string, string> = {
 };
 
 export default function DashboardPage() {
+  const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(true);
+
+  function handleLogout() {
+    fetch('/api/auth/logout', { method: 'POST', credentials: 'include' }).finally(() => {
+      router.push('/login');
+    });
+  }
 
   return (
     <div className="min-h-screen bg-slate-950 flex">
@@ -139,7 +147,7 @@ export default function DashboardPage() {
         </nav>
 
         <div className="p-3 border-t border-slate-800">
-          <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 hover:bg-red-500/10 hover:text-red-400 transition">
+          <button onClick={handleLogout} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 hover:bg-red-500/10 hover:text-red-400 transition">
             <LogOut className="w-5 h-5 shrink-0" />
             {sidebarOpen && <span className="text-sm font-medium">Sair</span>}
           </button>
