@@ -9,8 +9,8 @@ import {
   LogOut,
   Bell,
   Search,
-  Menu,
-  X,
+  ChevronLeft,
+  ChevronRight,
   DollarSign,
   ShoppingCart,
   Eye,
@@ -107,73 +107,76 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 flex">
+    <div className="h-screen bg-slate-950 flex">
       {/* Sidebar */}
-      <aside
-        className={`${
-          sidebarOpen ? 'w-64' : 'w-20'
-        } bg-slate-900/50 border-r border-slate-800 flex flex-col transition-all duration-300 shrink-0`}
-      >
-        <div className="p-4 border-b border-slate-800 flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-blue-600/20 border border-blue-500/30 flex items-center justify-center shrink-0">
-            <LayoutDashboard className="w-5 h-5 text-blue-400" />
+      <div className="relative flex h-full">
+        <aside
+          className={`${
+            sidebarOpen ? 'w-64' : 'w-20'
+          } bg-slate-900/50 border-r border-slate-800 flex flex-col h-full min-h-0 transition-all duration-300 shrink-0`}
+        >
+          <div className="p-4 border-b border-slate-800 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-blue-600/20 border border-blue-500/30 flex items-center justify-center shrink-0">
+              <LayoutDashboard className="w-5 h-5 text-blue-400" />
+            </div>
+            {sidebarOpen && (
+              <span className="font-bold text-white text-lg truncate">Green Field</span>
+            )}
           </div>
-          {sidebarOpen && (
-            <span className="font-bold text-white text-lg truncate">Green Field</span>
-          )}
+
+        <div className="flex-1 p-3 overflow-y-auto">
+          <div className="space-y-1">
+            {[
+              { icon: LayoutDashboard, label: 'Dashboard', active: true },
+              { icon: Users, label: 'Clientes' },
+              { icon: ShoppingCart, label: 'Pedidos' },
+              { icon: Eye, label: 'Produtos' },
+              { icon: TrendingUp, label: 'Analytics' },
+              { icon: Settings, label: 'Configurações' },
+            ].map((item) => (
+              <button
+                key={item.label}
+                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition ${
+                  item.active
+                    ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30'
+                    : 'text-slate-400 hover:bg-slate-800/50 hover:text-white'
+                }`}
+              >
+                <item.icon className="w-5 h-5 shrink-0" />
+                {sidebarOpen && <span className="text-sm font-medium">{item.label}</span>}
+              </button>
+            ))}
+          </div>
         </div>
 
-        <nav className="flex-1 p-3 space-y-1">
-          {[
-            { icon: LayoutDashboard, label: 'Dashboard', active: true },
-            { icon: Users, label: 'Clientes' },
-            { icon: ShoppingCart, label: 'Pedidos' },
-            { icon: Eye, label: 'Produtos' },
-            { icon: TrendingUp, label: 'Analytics' },
-            { icon: Settings, label: 'Configurações' },
-          ].map((item) => (
-            <button
-              key={item.label}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition ${
-                item.active
-                  ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30'
-                  : 'text-slate-400 hover:bg-slate-800/50 hover:text-white'
-              }`}
-            >
-              <item.icon className="w-5 h-5 shrink-0" />
-              {sidebarOpen && <span className="text-sm font-medium">{item.label}</span>}
-            </button>
-          ))}
-        </nav>
-
-        <div className="p-3 border-t border-slate-800">
+        <div className="p-3 space-y-1 border-t border-slate-800 shrink-0">
+          <button
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 hover:bg-slate-800/50 hover:text-white transition"
+          >
+            {sidebarOpen ? <ChevronLeft className="w-5 h-5 shrink-0" /> : <ChevronRight className="w-5 h-5 shrink-0" />}
+            {sidebarOpen && <span className="text-sm font-medium">Recolher</span>}
+          </button>
           <button onClick={handleLogout} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 hover:bg-red-500/10 hover:text-red-400 transition">
             <LogOut className="w-5 h-5 shrink-0" />
             {sidebarOpen && <span className="text-sm font-medium">Sair</span>}
           </button>
         </div>
       </aside>
+    </div>
 
-      {/* Main Content */}
+    {/* Main Content */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Header */}
         <header className="h-16 border-b border-slate-800 bg-slate-900/30 flex items-center justify-between px-6 shrink-0">
-          <div className="flex items-center gap-4">
-            <button
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="p-2 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white transition"
-            >
-              {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-            </button>
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-              <input
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+            <input
                 type="text"
                 placeholder="Buscar..."
                 className="pl-10 pr-4 py-2 rounded-lg bg-slate-800/50 border border-slate-700 text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 w-64"
               />
             </div>
-          </div>
           <div className="flex items-center gap-3">
             <button className="p-2 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white transition relative">
               <Bell className="w-5 h-5" />
