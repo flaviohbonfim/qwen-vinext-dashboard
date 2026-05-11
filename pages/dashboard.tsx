@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import {
   LayoutDashboard,
@@ -15,6 +15,8 @@ import {
   ShoppingCart,
   Eye,
   TrendingUp,
+  Moon,
+  Sun,
 } from 'lucide-react';
 
 const revenueData = [
@@ -60,15 +62,15 @@ function RevenueChart() {
         const value = Math.round(maxRevenue * ratio);
         return (
           <g key={ratio}>
-            <line x1={padding} y1={y} x2={chartWidth - padding} y2={y} stroke="#1e293b" strokeDasharray="4 4" />
-            <text x={padding - 10} y={y + 4} textAnchor="end" fill="#64748b" fontSize={11}>
+            <line x1={padding} y1={y} x2={chartWidth - padding} y2={y} stroke="#e2e8f0" className="dark:stroke-slate-800" strokeDasharray="4 4" />
+            <text x={padding - 10} y={y + 4} textAnchor="end" fill="#64748b" className="dark:fill-slate-400" fontSize={11}>
               {value >= 1000 ? `${value / 1000}k` : value}
             </text>
           </g>
         );
       })}
       {points.map((p) => (
-        <text key={p.month} x={p.x} y={chartHeight - 10} textAnchor="middle" fill="#64748b" fontSize={11}>
+        <text key={p.month} x={p.x} y={chartHeight - 10} textAnchor="middle" fill="#64748b" className="dark:fill-slate-400" fontSize={11}>
           {p.month}
         </text>
       ))}
@@ -91,14 +93,45 @@ const orders = [
 ];
 
 const statusColors: Record<string, string> = {
-  'Concluído': 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
-  'Pendente': 'bg-amber-500/10 text-amber-400 border-amber-500/20',
-  'Cancelado': 'bg-red-500/10 text-red-400 border-red-500/20',
+  'Concluído': 'bg-emerald-500/10 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 dark:border-emerald-500/20',
+  'Pendente': 'bg-amber-500/10 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20 dark:border-amber-500/20',
+  'Cancelado': 'bg-red-500/10 dark:bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20 dark:border-red-500/20',
 };
 
 export default function DashboardPage() {
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [isDark, setIsDark] = useState(true);
+
+  useEffect(() => {
+    const saved = localStorage.getItem('theme');
+    if (saved === 'light') {
+      setIsDark(false);
+      document.documentElement.classList.remove('dark');
+    } else if (saved === 'dark') {
+      setIsDark(true);
+      document.documentElement.classList.add('dark');
+    } else {
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      setIsDark(prefersDark);
+      if (prefersDark) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    }
+  }, []);
+
+  function toggleTheme() {
+    const newTheme = !isDark;
+    setIsDark(newTheme);
+    localStorage.setItem('theme', newTheme ? 'dark' : 'light');
+    if (newTheme) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }
 
   function handleLogout() {
     fetch('/api/auth/logout', { method: 'POST', credentials: 'include' }).finally(() => {
@@ -107,20 +140,20 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="h-screen bg-slate-950 flex">
+    <div className="h-screen bg-white dark:bg-slate-950 flex">
       {/* Sidebar */}
       <div className="relative flex h-full">
         <aside
           className={`${
             sidebarOpen ? 'w-64' : 'w-20'
-          } bg-slate-900/50 border-r border-slate-800 flex flex-col h-full min-h-0 transition-all duration-300 shrink-0`}
+          } bg-slate-100 dark:bg-slate-900/50 border-r border-slate-200 dark:border-slate-800 flex flex-col h-full min-h-0 transition-all duration-300 shrink-0`}
         >
-          <div className="p-4 border-b border-slate-800 flex items-center gap-3">
+          <div className="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-blue-600/20 border border-blue-500/30 flex items-center justify-center shrink-0">
-              <LayoutDashboard className="w-5 h-5 text-blue-400" />
+              <LayoutDashboard className="w-5 h-5 text-blue-500 dark:text-blue-400" />
             </div>
             {sidebarOpen && (
-              <span className="font-bold text-white text-lg truncate">Green Field</span>
+              <span className="font-bold text-slate-900 dark:text-white text-lg truncate">Green Field</span>
             )}
           </div>
 
@@ -138,8 +171,8 @@ export default function DashboardPage() {
                 key={item.label}
                 className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition ${
                   item.active
-                    ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30'
-                    : 'text-slate-400 hover:bg-slate-800/50 hover:text-white'
+                    ? 'bg-blue-600/20 text-blue-600 dark:text-blue-400 border border-blue-500/30'
+                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 hover:text-slate-900 dark:hover:text-white'
                 }`}
               >
                 <item.icon className="w-5 h-5 shrink-0" />
@@ -149,15 +182,15 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        <div className="p-3 space-y-1 border-t border-slate-800 shrink-0">
+        <div className="p-3 space-y-1 border-t border-slate-200 dark:border-slate-800 shrink-0">
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 hover:bg-slate-800/50 hover:text-white transition"
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 hover:text-slate-900 dark:hover:text-white transition"
           >
             {sidebarOpen ? <ChevronLeft className="w-5 h-5 shrink-0" /> : <ChevronRight className="w-5 h-5 shrink-0" />}
             {sidebarOpen && <span className="text-sm font-medium">Recolher</span>}
           </button>
-          <button onClick={handleLogout} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 hover:bg-red-500/10 hover:text-red-400 transition">
+          <button onClick={handleLogout} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-red-500/10 dark:hover:bg-red-500/10 hover:text-red-600 dark:hover:text-red-400 transition">
             <LogOut className="w-5 h-5 shrink-0" />
             {sidebarOpen && <span className="text-sm font-medium">Sair</span>}
           </button>
@@ -168,29 +201,32 @@ export default function DashboardPage() {
     {/* Main Content */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Header */}
-        <header className="h-16 border-b border-slate-800 bg-slate-900/30 flex items-center justify-between px-6 shrink-0">
+        <header className="h-16 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/30 flex items-center justify-between px-6 shrink-0">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-slate-500" />
             <input
                 type="text"
                 placeholder="Buscar..."
-                className="pl-10 pr-4 py-2 rounded-lg bg-slate-800/50 border border-slate-700 text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 w-64"
+                className="pl-10 pr-4 py-2 rounded-lg bg-white dark:bg-slate-800/50 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 w-64"
               />
             </div>
           <div className="flex items-center gap-3">
-            <button className="p-2 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white transition relative">
+            <button onClick={toggleTheme} className="p-2 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition">
+              {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+            </button>
+            <button className="p-2 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition relative">
               <Bell className="w-5 h-5" />
               <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-blue-500 rounded-full" />
             </button>
             <div className="w-8 h-8 rounded-full bg-blue-600/20 border border-blue-500/30 flex items-center justify-center">
-              <span className="text-blue-400 text-sm font-medium">A</span>
+              <span className="text-blue-600 dark:text-blue-400 text-sm font-medium">A</span>
             </div>
           </div>
         </header>
 
         {/* Dashboard Content */}
         <main className="flex-1 p-6 overflow-auto">
-          <h1 className="text-2xl font-bold text-white mb-6">Dashboard</h1>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-6">Dashboard</h1>
 
           {/* Summary Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
@@ -200,55 +236,55 @@ export default function DashboardPage() {
               { label: 'Visitantes', value: '45.678', change: '+23.1%', icon: Eye, color: 'purple' },
               { label: 'Taxa de Conversão', value: '3.2%', change: '+2.1%', icon: TrendingUp, color: 'amber' },
             ].map((card) => (
-              <div key={card.label} className="bg-slate-900/50 border border-slate-800 rounded-xl p-5 hover:border-slate-700 transition">
+              <div key={card.label} className="bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-xl p-5 hover:border-slate-300 dark:hover:border-slate-700 transition">
                 <div className="flex items-center justify-between mb-3">
-                  <span className="text-slate-400 text-sm">{card.label}</span>
+                  <span className="text-slate-500 dark:text-slate-400 text-sm">{card.label}</span>
                   <div className={`w-10 h-10 rounded-lg bg-${card.color}-500/10 border border-${card.color}-500/20 flex items-center justify-center`}>
-                    <card.icon className={`w-5 h-5 text-${card.color}-400`} />
+                    <card.icon className={`w-5 h-5 text-${card.color}-600 dark:text-${card.color}-400`} />
                   </div>
                 </div>
-                <div className="text-2xl font-bold text-white mb-1">{card.value}</div>
-                <span className="text-emerald-400 text-sm font-medium">{card.change} este mês</span>
+                <div className="text-2xl font-bold text-slate-900 dark:text-white mb-1">{card.value}</div>
+                <span className="text-emerald-600 dark:text-emerald-400 text-sm font-medium">{card.change} este mês</span>
               </div>
             ))}
           </div>
 
           {/* Revenue Chart */}
-          <div className="bg-slate-900/50 border border-slate-800 rounded-xl p-6 mb-6">
-            <h2 className="text-lg font-semibold text-white mb-4">Receita Mensal</h2>
+          <div className="bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-xl p-6 mb-6">
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">Receita Mensal</h2>
             <div className="h-80">
               <RevenueChart />
             </div>
           </div>
 
           {/* Recent Orders */}
-          <div className="bg-slate-900/50 border border-slate-800 rounded-xl overflow-hidden">
-            <div className="p-6 border-b border-slate-800">
-              <h2 className="text-lg font-semibold text-white">Pedidos Recentes</h2>
+          <div className="bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden">
+            <div className="p-6 border-b border-slate-200 dark:border-slate-800">
+              <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Pedidos Recentes</h2>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="border-b border-slate-800">
-                    <th className="text-left px-6 py-3 text-xs font-medium text-slate-400 uppercase tracking-wider">ID</th>
-                    <th className="text-left px-6 py-3 text-xs font-medium text-slate-400 uppercase tracking-wider">Cliente</th>
-                    <th className="text-left px-6 py-3 text-xs font-medium text-slate-400 uppercase tracking-wider">Valor</th>
-                    <th className="text-left px-6 py-3 text-xs font-medium text-slate-400 uppercase tracking-wider">Status</th>
-                    <th className="text-left px-6 py-3 text-xs font-medium text-slate-400 uppercase tracking-wider">Data</th>
+                  <tr className="border-b border-slate-200 dark:border-slate-800">
+                    <th className="text-left px-6 py-3 text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">ID</th>
+                    <th className="text-left px-6 py-3 text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Cliente</th>
+                    <th className="text-left px-6 py-3 text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Valor</th>
+                    <th className="text-left px-6 py-3 text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Status</th>
+                    <th className="text-left px-6 py-3 text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Data</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-800">
+                <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
                   {orders.map((order) => (
-                    <tr key={order.id} className="hover:bg-slate-800/30 transition">
-                      <td className="px-6 py-4 text-sm text-blue-400 font-mono">{order.id}</td>
-                      <td className="px-6 py-4 text-sm text-white">{order.customer}</td>
-                      <td className="px-6 py-4 text-sm text-white font-medium">{order.amount}</td>
+                    <tr key={order.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition">
+                      <td className="px-6 py-4 text-sm text-blue-600 dark:text-blue-400 font-mono">{order.id}</td>
+                      <td className="px-6 py-4 text-sm text-slate-900 dark:text-white">{order.customer}</td>
+                      <td className="px-6 py-4 text-sm text-slate-900 dark:text-white font-medium">{order.amount}</td>
                       <td className="px-6 py-4">
                         <span className={`inline-flex px-2.5 py-1 rounded-full text-xs font-medium border ${statusColors[order.status]}`}>
                           {order.status}
                         </span>
                       </td>
-                      <td className="px-6 py-4 text-sm text-slate-400">{order.date}</td>
+                      <td className="px-6 py-4 text-sm text-slate-500 dark:text-slate-400">{order.date}</td>
                     </tr>
                   ))}
                 </tbody>
